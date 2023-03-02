@@ -81,6 +81,31 @@ for sight, s, f, c in product(sights, sizes, foods, coop):
 
 for sight, s, f, c in product(sights, sizes, foods, coop):
     register(
+        id="PO-Adhoc-DVRL-Foraging-{0}-{1}x{1}-{2}f{3}-v0".format(sight, s, f, "-coop" if c else ""),
+        entry_point="lbforaging.foraging:ForagingEnv",
+        kwargs={
+            "players": 5,
+            "max_player_level": 3,
+            "field_size": (s, s),
+            "max_food": f,
+            "sight": sight,
+            "other_player_sight": s,
+            "max_episode_steps": 50,
+            "force_coop": c,
+            "seed": 100,
+            "effective_max_num_players": 3,
+            "init_num_players": 3,
+            "with_shuffle": False,
+            "gnn_input": False,
+            "with_openness": True,
+            "with_gnn_shuffle": False,
+            "collapsed": False,
+            "ready_obs": True,
+        },
+    )
+
+for sight, s, f, c in product(sights, sizes, foods, coop):
+    register(
         id="P-Adhoc-Foraging-{0}-{1}x{1}-{2}f{3}-v0".format(sight, s, f, "-coop" if c else ""),
         entry_point="lbforaging.foraging:ForagingEnv",
         kwargs={

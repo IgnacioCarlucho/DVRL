@@ -6,7 +6,7 @@ opencv_python==3.3.0.10
 sacred==0.7.4
 docopt==0.6.2
 pybullet==1.7.4
-torch==0.4.0
+torch==1.0.0
 pandas==0.20.3
 scipy==1.0.0
 pyyaml==5.1

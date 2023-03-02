@@ -47,6 +47,10 @@ from sacred import Experiment
 from sacred.utils import apply_backspaces_and_linefeeds
 from torch.autograd import Variable
 
+
+import lbforaging
+
+
 import utils
 # Own imports
 from envs import make_env
@@ -210,6 +214,7 @@ def setup(rl_setting, device, _run, _log, log, seed, cuda):
     obs = envs.reset()
     if not actor_critic.observation_type == "fc":
         obs = obs / 255.0
+    print(obs)
     current_obs = torch.from_numpy(obs).float()
     # init_states = Variable(torch.zeros(rl_setting['num_processes'], actor_critic.state_size))
     init_states = actor_critic.new_latent_state()

@@ -87,7 +87,8 @@ class ForagingEnv(Env):
         gnn_input=False,
         with_openness=True,
         with_gnn_shuffle=False,
-        collapsed=False
+        collapsed=False,
+        ready_obs=False,
     ):
         self.logger = logging.getLogger(__name__)
         self.seed_val = seed
@@ -107,7 +108,8 @@ class ForagingEnv(Env):
         self.with_openness = with_openness
         self.field = np.zeros(field_size, np.int32)
         self.init_num_players_w_reset = init_num_players
-
+        self.ready_obs= ready_obs
+        self.init_players = players
         self.max_food = max_food
         self._food_spawned = 0.0
         self.max_player_level = max_player_level
@@ -148,7 +150,11 @@ class ForagingEnv(Env):
 
     @property
     def observation_space(self):
-        return self._get_observation_space_real()
+        if self.ready_obs:
+            return self._get_observation_space_real()["all_information"]
+        else:
+
+            return self._get_observation_space_real()
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -443,6 +449,36 @@ class ForagingEnv(Env):
                     )
                     break
                 attempts += 1
+
+    def process_observation(self,obs):
+        final_obs = None  
+        try:
+            batch_size = obs["player_info_shuffled"].shape[0]
+        except IndexError:
+            obs = obs.item(0)
+            batch_size = obs["player_info_shuffled"].shape[0]
+        player_obs = np.reshape(obs["player_info_shuffled"], (batch_size, self.init_players, -1))
+        other_obs = np.repeat(
+            np.reshape(obs["food_info"], (batch_size, 1, -1)),
+            self.init_players,
+            axis=1)
+        added_data = np.zeros((batch_size, self.init_players, 2))
+        # Add feature to distinguish player from others
+        added_data[:, 0, 0] = 1
+
+        all_obs = np.concatenate([player_obs, other_obs], axis=-1)
+
+        # Add feature to distinguish player from others
+        added_data[:, 0, 0] = 1
+
+        # Add feature that denotes agent existence
+        if not "fortattack" in self.env_name:
+            agent_exists = all_obs[:, :, 0] != -1
+            added_data[agent_exists, 1] = 1
+
+        final_obs = np.concatenate([added_data, all_obs], axis=-1)
+
+        return final_obs
 
     def _is_valid_action(self, player, action):
         if action == Action.NONE:
@@ -801,6 +837,9 @@ class ForagingEnv(Env):
         self.npc_type_name_list = [None] * (len(self.players) - 1)
         self.other_players_obs = [None] * (len(self.players) - 1)
         self.other_players_actions = [-1] * (len(self.players) - 1)
+        
+
+
 
         sorted_agent_queue = self.agent_queue.copy()
         sorted_agent_queue.sort()
@@ -817,7 +856,11 @@ class ForagingEnv(Env):
             self.prev_actions[k - 1] for k in complete_pre_valid_elements if k != 0
         ]
 
+
+        if self.ready_obs:
+            self.prev_actions = [-1] * (self.init_players - 1)
         unscrambled_actions = self.prev_actions.copy()
+
         pointer = 0
         for idx, a in enumerate(unscrambled_actions):
             if a != -1:
@@ -931,10 +974,16 @@ class ForagingEnv(Env):
             for i in range(num_agents):
                 returned_obs[self.max_food * 3 + 3 * non_zero_idxes[i]: self.max_food * 3 + 3 * non_zero_idxes[i] + 3] = \
                     nobs[0][1][self.max_food * 3 + 3 * i:self.max_food * 3 + 3 * i + 3]
-            return {"all_information": returned_obs[:-1]}
+            if self.ready_obs:
+                return returned_obs[:-1]
+            else:
+                return {"all_information": returned_obs[:-1]}
 
         if not self.gnn_input:
-            return {"all_information": nobs[0][1][:-1]}
+            if self.ready_obs:
+                return nobs[0][1][:-1]
+            else:
+                return {"all_information": nobs[0][1][:-1]}
 
 
         player_obs = np.zeros(len(self.players) * 3, np.int32)
@@ -1219,7 +1268,7 @@ class ForagingEnv(Env):
                 else:
                     self.other_players_obs[idx] = nob[0]
             idx += 1
-
+        
         if self.with_shuffle:
             returned_obs = np.copy(nobs[0][1])
             non_zero_idxes = [0]
@@ -1235,10 +1284,18 @@ class ForagingEnv(Env):
                 returned_obs[self.max_food * 3 + 3 * non_zero_idxes[i]: self.max_food * 3 + 3 * non_zero_idxes[i] + 3] = \
                     nobs[0][1][self.max_food * 3 + 3 * i:self.max_food * 3 + 3 * i + 3]
 
-            return {"all_information": returned_obs[:-1]}, nreward[0], ndone, ninfo[0]
-
+            if self.ready_obs:
+                return returned_obs[:-1], nreward[0], ndone, ninfo[0]
+            else:
+                return {"all_information": returned_obs[:-1]}, nreward[0], ndone, ninfo[0]
+        
         if not self.gnn_input:
-            return {"all_information": nobs[0][1][:-1]}, nreward[0], ndone, ninfo[0]
+            if self.ready_obs:
+                return nobs[0][1][:-1], nreward[0], ndone, ninfo[0]
+            else:
+                return {"all_information": nobs[0][1][:-1]}, nreward[0], ndone, ninfo[0]
+
+
 
         player_obs = np.zeros(len(self.players) * 3, np.int32)
         complete_player_obs = np.zeros(len(self.players) * 3, np.int32)
@@ -1374,8 +1431,9 @@ class ForagingEnv(Env):
         self.complete_prev_active_unobs = self.complete_active_unobs
         self.active_unobs = active_unobs[0]
         self.complete_active_unobs = complete_active_unobs[0]
-
+        
         if not self.with_gnn_shuffle:
+
             return {
                        'food_info': food_info_obs,
                        'food_info_complete': complete_food_info_obs,
@@ -1423,6 +1481,7 @@ class ForagingEnv(Env):
         collapsed_data = np.append(collapsed_data, prev_action_data, axis=-1)
 
         return collapsed_data, nreward[0], ndone, ninfo[0]
+
 
     def _init_render(self):
         from .rendering import Viewer
