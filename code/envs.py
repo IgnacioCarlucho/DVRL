@@ -6,10 +6,10 @@ from gym.spaces.box import Box
 from baselines import bench
 from baselines.common.atari_wrappers import make_atari, wrap_deepmind
 
-try:
-    import pybullet_envs
-except ImportError:
-    pass
+#try:
+#    import pybullet_envs
+#except ImportError:
+#    pass
 
 
 def make_env(env_id, seed, rank, log_dir, frameskips_cases):
