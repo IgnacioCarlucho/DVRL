@@ -12,7 +12,7 @@ server:
   gpu_id: None
 
 opt:
-  optimizer : RMSProp
+  optimizer : Adam # RMSProp
   alpha : 0.99 # RMSProp
   betas : [0.9, 0.999] # Adam
 
@@ -22,12 +22,13 @@ opt:
 
 rl_setting:
   gamma : 0.99
-  num_processes : 16 # 16
+  num_processes : 16
   num_steps : 5
+  num_processes_test: 16
 
 log:
-  log_interval : 1000
-  save_model_interval : 0
+  log_interval : 2000 #2000
+  save_model_interval : 2000 # 2000
 
   save_reconstruction_interval: 0
   save_particle_reconstruction: False
@@ -37,7 +38,7 @@ log:
 
 loss_function:
   # Num_updates = num_frames//num_steps//num_processes
-  num_frames : 50.0e06
+  num_frames : 6400000
   # action_loss: 1
   action_loss_coef : 1.
   entropy_coef : 0.01
@@ -78,3 +79,8 @@ algorithm:
 
     prior_loss_coef: 1.0
     obs_loss_coef: 1.0
+
+load:
+  run: 32
+  epoch: 1000
+

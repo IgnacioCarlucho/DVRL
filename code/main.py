@@ -214,7 +214,7 @@ def setup(rl_setting, device, _run, _log, log, seed, cuda):
     obs = envs.reset()
     if not actor_critic.observation_type == "fc":
         obs = obs / 255.0
-    print(obs)
+    # print(obs)
     current_obs = torch.from_numpy(obs).float()
     # init_states = Variable(torch.zeros(rl_setting['num_processes'], actor_critic.state_size))
     init_states = actor_critic.new_latent_state()
@@ -668,3 +668,4 @@ def main(_run, seed, opt, environment, rl_setting, log, algorithm, loss_function
     # Save final model
     utils.save_model(id_tmp_dir, "model_final", actor_critic, _run)
     # os.remove(id_tmp_dir)
+    print("Finished training")

@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=cook_qmix
+#SBATCH --job-name=dvrl_lbf
 #SBATCH --cpus-per-task=4
-#SBATCH --time=8-24:00:00
+#SBATCH --time=2-24:00:00
 #SBATCH --mem-per-cpu=4G
 #SBATCH --gres=gpu:1
 
