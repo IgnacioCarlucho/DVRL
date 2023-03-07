@@ -40,7 +40,7 @@ def make_env(env_id, seed, rank, log_dir, frameskips_cases):
         if len(obs_shape) == 3 and obs_shape[2] in [1, 3]:
             print("Wrap Pytorch")
             env = WrapPyTorch(env)
-        print(env)
+        # print(env)
         return env
 
     return _thunk
