@@ -55,6 +55,8 @@ class DVRLPolicy(model.Policy):
         particle_aggregation,
         z_dim,
         resample,
+        average_particle,
+
     ):
         super().__init__(action_space, encoding_dimension=h_dim)
         self.init_function = init_function
@@ -70,6 +72,7 @@ class DVRLPolicy(model.Policy):
         self.h_dim = h_dim
         self.z_dim = z_dim
         self.resample = resample
+        self.average_particle = average_particle
 
         # All encoder/decoders are defined in the encoder_decoder.py file
         self.cnn_output_dimension = encoder_decoder.get_cnn_output_dimension(
@@ -134,9 +137,14 @@ class DVRLPolicy(model.Policy):
         dim = 2 * h_dim + 1
         if particle_aggregation == "rnn" and self.num_particles > 1:
             self.particle_gru = nn.GRU(dim, h_dim, batch_first=True)
-
-        elif self.num_particles == 1:
+        elif particle_aggregation != "rnn" and self.num_particles == 1:
             self.particle_gru = nn.Linear(dim, h_dim)
+        elif particle_aggregation != "rnn" and self.num_particles > 1 and self.average_particle==True:
+            # we will average over the particle using a linear layer
+            self.particle_gru = nn.Linear(dim, h_dim)
+        else:
+            # the input to the linear layer will be all particles
+            self.particle_gru = nn.Linear(dim*self.num_particles, h_dim)
 
         self.reset_parameters()
 
@@ -449,18 +457,59 @@ class DVRLPolicy(model.Policy):
             [state, torch.exp(normalized_log_weights).unsqueeze(-1)], dim=2
         )
 
-        if self.num_particles == 1:
+        # if self.num_particles == 1:
+        #     # Get rid of particle dimension, particle_gru is just a nn.Linear
+        #     particle_state = particle_state.squeeze(1)
+        #     encoded_particles = self.particle_gru(particle_state)
+        #     # encoded_particles = self.particle_gru_bn(encoded_particles)
+        #     return encoded_particles
+        # else:
+        #     # [16, 10, 257]
+        #     print("particle_state.size()", particle_state.size())
+        #     _, encoded_particles = self.particle_gru(particle_state)
+        #     # encoded_particles [num_layers * num_directions, batch, h_dim]
+        #     # First dimension: num_layers * num_directions
+        #     # Dimension of Output?
+        #     print("encoded_particles.size()", encoded_particles.size())
+        #     print("encoded_particles[0].size()", encoded_particles[0].size())
+        #     # output [16, 128]
+        #     return encoded_particles[0]
+
+
+        if self.particle_aggregation == "rnn" and self.num_particles > 1:
+            # [batch, num particle, feat]
+            _, encoded_particles = self.particle_gru(particle_state)
+            # encoded_particles [num_layers * num_directions, batch, h_dim]
+            # First dimension: num_layers * snum_directions
+            # Dimension of Output?
+            # [batch, h_dim]
+            return encoded_particles[0]
+
+        elif self.particle_aggregation != "rnn" and self.num_particles == 1:
+            # [batch, 1, feat]
             # Get rid of particle dimension, particle_gru is just a nn.Linear
             particle_state = particle_state.squeeze(1)
             encoded_particles = self.particle_gru(particle_state)
+            # [batch, h_dim]
             # encoded_particles = self.particle_gru_bn(encoded_particles)
             return encoded_particles
+
+        elif self.particle_aggregation != "rnn" and self.num_particles > 1 and self.average_particle==True:
+            # [batch, num particle, feat]
+            # average over particles
+            particle_state = particle_state.mean(1)
+            # [batch, feat]
+            encoded_particles = self.particle_gru(particle_state)
+            # [batch, h_dim] 
+            return encoded_particles
         else:
-            _, encoded_particles = self.particle_gru(particle_state)
-            # encoded_particles [num_layers * num_directions, batch, h_dim]
-            # First dimension: num_layers * num_directions
-            # Dimension of Output?
-            return encoded_particles[0]
+            # [batch, num particle, feat]
+            # Adding a linear network that can encode the particles
+            particle_state = particle_state.view(-1, (2 * self.h_dim + 1)*self.num_particles)
+            # [batch, num particle*feat]
+            encoded_particles = self.particle_gru(particle_state)
+            # [batch, h_dim] 
+            return encoded_particles
 
 
 class VRNN_encoding(nn.Module):

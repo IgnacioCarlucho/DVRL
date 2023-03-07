@@ -3,6 +3,7 @@
 environment:
   name : "PO-Adhoc-DVRL-Foraging-2-12x12-3f-v0"
   entry_point : False # "environments.death_valley:DeathValleyEnv"
+  train : True
   max_episode_steps : 50
   vec_norm: False
   frameskips_cases: []

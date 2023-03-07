@@ -12,7 +12,7 @@ server:
   gpu_id: None
 
 opt:
-  optimizer : Adam # RMSProp
+  optimizer : RMSProp
   alpha : 0.99 # RMSProp
   betas : [0.9, 0.999] # Adam
 
@@ -35,6 +35,7 @@ log:
   predicted_times: [0,1,2,3,4,5,10]
 
   tmp_dir : './tmp/gym/'
+  test_dir: "lbf"
 
 loss_function:
   # Num_updates = num_frames//num_steps//num_processes
@@ -46,7 +47,7 @@ loss_function:
   encoding_loss_coef: 0.0
 
 algorithm:
-  use_particle_filter : False
+  use_particle_filter : True
 
   # BPTT for num_steps * multiplier_backprop_length
   multiplier_backprop_length : 5
@@ -74,13 +75,13 @@ algorithm:
 
   particle_filter:
     num_particles : 10
-    particle_aggregation: rnn
+    particle_aggregation: fc # rnn
     z_dim : 256
-
+    average_particle : True # when using linear layer we average the particles
     prior_loss_coef: 1.0
     obs_loss_coef: 1.0
 
 load:
-  run: 32
-  epoch: 1000
+  run: 4
+  epoch: 0
 
