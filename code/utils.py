@@ -83,6 +83,19 @@ def save_model(dir, name, model, _run):
 
     logging.info('Saving model {}: Size: {} MB'.format(name, s_current))
 
+def load_model(test_name,run, name, model, _run): 
+    """
+    load the model to the observer using the `name`.
+    _run is the _run object from sacred.
+    """
+
+    name_model = str(test_name) + '/' + str(run) + '/' + name #\+  '.pt'# "" + '/' + 'model_epoch_' + str(ckpt) + '.pt'
+    print("loading model")
+    print(name_model)
+
+    model.load_state_dict(torch.load(name_model, map_location='cpu'))
+    return model 
+
 
 def save_numpy(dir, name, array, _run):
     """
