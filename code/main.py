@@ -306,7 +306,7 @@ def register_and_create_Envs(id_tmp_dir, seed, environment, rl_setting):
     envs = [
         make_env(
             environment["name"],
-            seed,
+            100 * i + seed,
             i,
             id_tmp_dir,
             frameskips_cases=environment["frameskips_cases"],
