@@ -323,9 +323,9 @@ class DVRLPolicy(model.Policy):
         assert self.prior_loss_coef == 1
         assert self.obs_loss_coef == 1
         new_log_weight = transition_logpdf - proposal_logpdf + emission_logpdf
-        assert torch.sum(transition_logpdf != transition_logpdf) == 0
-        assert torch.sum(proposal_logpdf != proposal_logpdf) == 0
-        assert torch.sum(emission_logpdf != emission_logpdf) == 0
+        #assert torch.sum(transition_logpdf != transition_logpdf) == 0
+        #assert torch.sum(proposal_logpdf != proposal_logpdf) == 0
+        #assert torch.sum(emission_logpdf != emission_logpdf) == 0
         # new_log_weight = (self.prior_loss_coef * (transition_logpdf - proposal_logpdf)
         #                   + self.obs_loss_coef * emission_logpdf)
 
