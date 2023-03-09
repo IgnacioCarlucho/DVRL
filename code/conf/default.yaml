@@ -16,7 +16,7 @@ opt:
   alpha : 0.99 # RMSProp
   betas : [0.9, 0.999] # Adam
 
-  lr : 3.0e-04
+  lr : 1.0e-04
   eps : 1.0e-05
   max_grad_norm : 0.5
 
@@ -69,13 +69,13 @@ algorithm:
     init_function: orthogonal_
     encoder_batch_norm: False
     policy_batch_norm: False
-    detach_encoder: False
+    detach_encoder: False # False
 
     obs_loss_coef: 0.0
 
   particle_filter:
     num_particles : 10
-    particle_aggregation: fc # rnn
+    particle_aggregation: rnn # rnn
     z_dim : 256
     average_particle : True # when using linear layer we average the particles
     prior_loss_coef: 1.0
