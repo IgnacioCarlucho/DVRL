@@ -1,0 +1,6 @@
+setup.py
+wolfpack.egg-info/PKG-INFO
+wolfpack.egg-info/SOURCES.txt
+wolfpack.egg-info/dependency_links.txt
+wolfpack.egg-info/requires.txt
+wolfpack.egg-info/top_level.txt
