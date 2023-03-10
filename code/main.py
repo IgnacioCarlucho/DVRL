@@ -49,7 +49,7 @@ from torch.autograd import Variable
 
 
 import lbforaging
-
+import Wolfpack_gym
 
 import utils
 # Own imports

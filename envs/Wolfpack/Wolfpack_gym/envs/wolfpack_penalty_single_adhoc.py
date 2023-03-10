@@ -28,7 +28,7 @@ class Generator(object):
         self.deathLimit = deathLimit
         self.birthLimit = birthLimit
         self.copy = None
-        self.seed = seed
+        self.seed_val = seed
         self.prng = RandomState(seed)
 
     def initialiseMap(self):
@@ -160,6 +160,7 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
         self.rnn_with_gnn = rnn_with_gnn
         self.collapsed = collapsed
         self.perturbation_probs=perturbation_probs
+        self.ready_obs = ready_obs
 
         N_DISCRETE_ACTIONS = 5
         self.action_space = spaces.Discrete(N_DISCRETE_ACTIONS)
@@ -248,6 +249,16 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
                     self.max_player_num, teammate_loc_len+oppo_info_len+2,
                 )
             )
+        if self.ready_obs:
+            teammate_loc_len = 2
+            oppo_info_len = 12
+
+            self.observation_space=spaces.Box(
+                low=-np.inf, high=+np.inf,
+                shape=(
+                    22,
+                )
+            )
 
         if self.with_rgb:
             obs_dict = {}
@@ -286,10 +297,10 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
         # Define seeds for the agent initial position generator
         if seed is None:
             seed = int(time.time())
-        self.seed = seed
+        self.seed_val = seed
         # self.randomizer = random
-        self.prng = RandomState(self.seed)
-        self.scheduler = OpenScheduler(self.num_players - 1, self.add_rate, self.del_rate, self.implicit_max_player_num - 1, seed=self.seed)
+        self.prng = RandomState(self.seed_val)
+        self.scheduler = OpenScheduler(self.num_players - 1, self.add_rate, self.del_rate, self.implicit_max_player_num - 1, seed=self.seed_val)
 
         # Define the observation space of the preys
         self.sight_sideways = sight_sideways
@@ -358,7 +369,7 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
         self.a_to_idx = None
         self.idx_to_a = None
         self.prev_dist_to_food = None
-        self.ready_obs = ready_obs
+        
 
 
         self.food_obs_type = ["partial_obs" for _ in range(self.max_food_num)]
@@ -390,14 +401,19 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
         with open(filename, 'wb') as f:
             pkl.dump(self.levelMap, f)
 
+    def seed(self, seed=None):
+        self.seed_val = seed
+        self.prng = RandomState(seed)
+        return 
+
     def load_map(self, filename):
         with open(filename, 'rb') as f:
             self.levelMap = pkl.load(f)
 
     def reset(self):
         # Reset Visualizer
-        self.seed = self.seed + 1250
-        self.prng = RandomState(self.seed)
+        self.seed_val = self.seed_val + 1250
+        self.prng = RandomState(self.seed_val)
         self.visualizer = None
         self.num_players = self.init_num_players
 
@@ -409,7 +425,7 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
         self.prev_player_positions = None
         self.prev_player_disappearance = None
 
-        self.scheduler = OpenScheduler(self.num_players - 1, self.add_rate, self.del_rate, self.implicit_max_player_num - 1, seed=self.seed)
+        self.scheduler = OpenScheduler(self.num_players - 1, self.add_rate, self.del_rate, self.implicit_max_player_num - 1, seed=self.seed_val)
 
         # Reset padded grids
         self.RGB_padded_grid = [[[0, 0, 255] for _ in range(2 * self.pads + self.grid_width)]
@@ -1260,7 +1276,7 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
             return player_returns[0][0], player_returns[1][0], player_returns[2][0], {}
 
 
-        return player_returns[0][0], player_returns[1][0], player_returns[2][0], {}
+       
 
     def render(self, mode='human', close=False):
         if self.visualizer is None:
@@ -1331,8 +1347,8 @@ class OpenScheduler(object):
         self.max_available_agents = max_available_agents
         self.alive_time = [0] * self.available_agents
         self.min_alive_time = min_alive_time
-        self.seed = seed
-        self.prng = RandomState(self.seed)
+        self.seed_val = seed
+        self.prng = RandomState(self.seed_val)
         self.timestep = 0
 
         # Use geometric distribution to sample remove or del
