@@ -75,7 +75,7 @@ algorithm:
 
   particle_filter:
     num_particles : 10
-    particle_aggregation: rnn # rnn
+    particle_aggregation: fc # rnn
     z_dim : 256
     average_particle : True # when using linear layer we average the particles
     prior_loss_coef: 1.0
