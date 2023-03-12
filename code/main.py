@@ -50,6 +50,7 @@ from torch.autograd import Variable
 
 import lbforaging
 import Wolfpack_gym
+import coopnavigation
 
 import utils
 # Own imports
