@@ -82,7 +82,8 @@ class NavigationEnvV2(Env):
         collapsed=False,
         designated_device="cuda:0",
         disappearance_prob=0.15,
-        perturbation_prob=[0.6, 0.3, 0.1]
+        perturbation_prob=[0.6, 0.3, 0.1],
+        ready_obs=False
     ):
         self.logger = logging.getLogger(__name__)
         self.seed_val = seed
@@ -103,7 +104,9 @@ class NavigationEnvV2(Env):
         self.field = np.zeros(field_size, np.int32)
         self.init_num_players_w_reset = init_num_players
         self.designated_device=torch.device(designated_device)
-
+        self.ready_obs = ready_obs
+        self.init_players = players 
+        
         self._food_spawned = 0.0
         self.sight = sight
         self.other_player_sight = other_player_sight
@@ -143,7 +146,12 @@ class NavigationEnvV2(Env):
 
     @property
     def observation_space(self):
-        return self._get_observation_space_real()
+        if self.ready_obs:
+            return self._get_observation_space_real()["all_information"]
+        else:
+
+            return self._get_observation_space_real()
+
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -251,12 +259,21 @@ class NavigationEnvV2(Env):
         food_info_len = 2 * max_food
         prev_actions = 1
 
-        return gym.spaces.Box(
-            low=-np.inf, high=+np.inf,
-            shape=(
-                len(self.players), teammate_info_len + food_info_len + prev_actions,
+        if self.ready_obs:
+        
+            return gym.spaces.Box(
+                low=-np.inf, high=+np.inf,
+                shape=(14)
             )
-        )
+
+
+        else:
+            return gym.spaces.Box(
+                low=-np.inf, high=+np.inf,
+                shape=(
+                    len(self.players), teammate_info_len + food_info_len + prev_actions,
+                )
+            )
 
     @classmethod
     def from_obs(cls, obs):
@@ -820,6 +837,8 @@ class NavigationEnvV2(Env):
             self.prev_actions[k - 1] for k in complete_pre_valid_elements if k != 0
         ]
 
+        if self.ready_obs:
+            self.prev_actions = [-1] * (self.init_players - 1)
         unscrambled_actions = self.prev_actions.copy()
         pointer = 0
         for idx, a in enumerate(unscrambled_actions):
@@ -934,10 +953,20 @@ class NavigationEnvV2(Env):
             for i in range(num_agents):
                 returned_obs[self.num_dest_tiles * 2 + 2 * non_zero_idxes[i]: self.num_dest_tiles * 2 + 2 * non_zero_idxes[i] + 2] = \
                     nobs[0][1][self.num_dest_tiles * 2 + 2 * i:self.num_dest_tiles * 2 + 2 * i + 2]
-            return {"all_information": returned_obs[:-1]}
+
+            if self.ready_obs:
+                return returned_obs[:-1]
+            else: 
+                return {"all_information": returned_obs[:-1]}
 
         if not self.gnn_input:
-            return {"all_information": nobs[0][1][:-1]}
+            if self.ready_obs:
+                return nobs[0][1][:-1]
+            else: 
+                return {"all_information": nobs[0][1][:-1]}
+
+
+         
 
 
         player_obs = np.zeros(len(self.players) * 2, np.int32)
@@ -1220,11 +1249,19 @@ class NavigationEnvV2(Env):
             for i in range(num_agents):
                 returned_obs[self.num_dest_tiles * 2 + 2 * non_zero_idxes[i]: self.num_dest_tiles * 2 + 2 * non_zero_idxes[i] + 2] = \
                     nobs[0][1][self.num_dest_tiles * 2 + 2 * i:self.num_dest_tiles * 3 + 2 * i + 2]
-
-            return {"all_information": returned_obs[:-1]}, nreward[0], ndone, ninfo[0]
+            if self.ready_obs:
+                return returned_obs[:-1], nreward[0], ndone, ninfo[0]
+            else:
+                return {"all_information": returned_obs[:-1]}, nreward[0], ndone, ninfo[0]
 
         if not self.gnn_input:
-            return {"all_information": nobs[0][1][:-1]}, nreward[0], ndone, ninfo[0]
+            if self.ready_obs:
+                return nobs[0][1][:-1], nreward[0], ndone, ninfo[0]
+            else:
+                return {"all_information": nobs[0][1][:-1]}, nreward[0], ndone, ninfo[0]
+
+
+            
 
         player_obs = np.zeros(len(self.players) * 2, np.int32)
         complete_player_obs = np.zeros(len(self.players) * 2, np.int32)

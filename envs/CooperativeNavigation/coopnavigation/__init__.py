@@ -59,13 +59,39 @@ for sight, s in product(sights, sizes):
             "seed": 100,
             "effective_max_num_players": 3,
             "init_num_players": 3,
-            "with_shuffle": True,
+            "with_shuffle": False,
             "gnn_input": False,
             "with_openness": True,
             "with_gnn_shuffle": False,
             "collapsed": False,
-            "designated_device": "cuda:0",
-            "disappearance_prob": 0.15,
-            "perturbation_prob": [0.6,0.3,0.1]
+            "designated_device": "cpu",
+            "disappearance_prob": 0.,
+            "perturbation_prob": [1.,0.,0.]
+        },
+    )
+
+
+for sight, s in product(sights, sizes):
+    register(
+        id="PO-Navigation-DVRL-{0}-{1}x{1}-v1".format(sight, s),
+        entry_point="coopnavigation.navigation:NavigationEnvV2",
+        kwargs={
+            "players": 5,
+            "field_size": (s, s),
+            "sight": sight,
+            "other_player_sight": s,
+            "max_episode_steps": 50,
+            "seed": 100,
+            "effective_max_num_players": 3,
+            "init_num_players": 3,
+            "with_shuffle": False,
+            "gnn_input": False,
+            "with_openness": True,
+            "with_gnn_shuffle": False,
+            "collapsed": False,
+            "designated_device": "cpu",
+            "disappearance_prob": 0.,
+            "perturbation_prob": [1.,0.,0.],
+            'ready_obs': True
         },
     )
