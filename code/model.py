@@ -119,7 +119,7 @@ class Policy(nn.Module):
                 observation=current_memory['current_obs'].to(device),
                 reward=current_memory['rewards'].to(device),
                 actions=current_memory['oneHotActions'].to(device).detach(),
-                previous_latent_state=current_memory['states'].to(device),
+                previous_latent_state=current_memory['states'].to(device).detach(),
                 predicted_times=predicted_times,
             )
 
