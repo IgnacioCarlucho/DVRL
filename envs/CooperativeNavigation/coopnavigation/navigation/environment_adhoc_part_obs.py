@@ -106,6 +106,7 @@ class NavigationEnvV2(Env):
         self.designated_device=torch.device(designated_device)
         self.ready_obs = ready_obs
         self.init_players = players 
+        self.max_num_player = players
         
         self._food_spawned = 0.0
         self.sight = sight
@@ -147,7 +148,17 @@ class NavigationEnvV2(Env):
     @property
     def observation_space(self):
         if self.ready_obs:
-            return self._get_observation_space_real()["all_information"]
+            # return self._get_observation_space_real()["all_information"]
+            player_len = self.max_num_player*2
+            max_food = 2
+            food_info_len = 2 * max_food
+            existence = self.max_num_player 
+
+            return gym.spaces.Box(
+                        low=-np.inf, high=+np.inf,
+                        shape=(player_len+food_info_len+existence,)
+                    )
+
         else:
 
             return self._get_observation_space_real()
@@ -259,21 +270,15 @@ class NavigationEnvV2(Env):
         food_info_len = 2 * max_food
         prev_actions = 1
 
-        if self.ready_obs:
-        
-            return gym.spaces.Box(
-                low=-np.inf, high=+np.inf,
-                shape=(14)
-            )
 
 
-        else:
-            return gym.spaces.Box(
-                low=-np.inf, high=+np.inf,
-                shape=(
-                    len(self.players), teammate_info_len + food_info_len + prev_actions,
-                )
+     
+        return gym.spaces.Box(
+            low=-np.inf, high=+np.inf,
+            shape=(
+                len(self.players), teammate_info_len + food_info_len + prev_actions,
             )
+        )
 
     @classmethod
     def from_obs(cls, obs):
@@ -939,6 +944,7 @@ class NavigationEnvV2(Env):
                     self.other_players_obs[idx] = nob[0]
             idx += 1
 
+
         if self.with_shuffle:
             returned_obs = np.copy(nobs[0][1])
             non_zero_idxes = [0]
@@ -1051,6 +1057,11 @@ class NavigationEnvV2(Env):
         complete_remaining_info = np.array(self.complete_remaining_idxs, np.int32)
         num_agents = np.array([sum(active_unobs[0])], np.int32)
         complete_num_agents = np.array([sum(complete_active_unobs[0])], np.int32)
+
+
+        if self.ready_obs:
+            
+            return np.hstack((remaining_info, player_info, food_info_obs))
 
         if not self.with_gnn_shuffle:
             return {
@@ -1236,6 +1247,7 @@ class NavigationEnvV2(Env):
                     self.other_players_obs[idx] = nob[0]
             idx += 1
 
+
         if self.with_shuffle:
             returned_obs = np.copy(nobs[0][1])
             non_zero_idxes = [0]
@@ -1393,6 +1405,11 @@ class NavigationEnvV2(Env):
         self.complete_prev_active_unobs = self.complete_active_unobs
         self.active_unobs = active_unobs[0]
         self.complete_active_unobs = complete_active_unobs[0]
+
+        
+        if self.ready_obs:
+            
+            return np.hstack((remaining_info, player_info, food_info_obs)), nreward[0], ndone, ninfo[0]
 
         if not self.with_gnn_shuffle:
             return {

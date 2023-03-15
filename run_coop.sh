@@ -11,7 +11,7 @@ export OMP_NUM_THREADS=1
 
 # export CUDA_VISIBLE_DEVICES="0"
 
-# python ./code/main.py -p with environment.config_file=coop.yaml seed=123
+python ./code/main.py -p with environment.config_file=coop.yaml seed=123
 # python ./code/main.py -p with environment.config_file=coop.yaml seed=445
 # python ./code/main.py -p with environment.config_file=coop.yaml seed=7881
 # python ./code/main.py -p with environment.config_file=coop.yaml seed=1116

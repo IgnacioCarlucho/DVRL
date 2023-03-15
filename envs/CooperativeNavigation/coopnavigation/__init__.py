@@ -85,7 +85,7 @@ for sight, s in product(sights, sizes):
             "effective_max_num_players": 3,
             "init_num_players": 3,
             "with_shuffle": False,
-            "gnn_input": False,
+            "gnn_input": True,
             "with_openness": True,
             "with_gnn_shuffle": False,
             "collapsed": False,
