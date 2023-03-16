@@ -156,7 +156,7 @@ class NavigationEnvV2(Env):
 
             return gym.spaces.Box(
                         low=-np.inf, high=+np.inf,
-                        shape=(player_len+food_info_len+existence,)
+                        shape=(player_len+food_info_len,)
                     )
 
         else:
@@ -1060,7 +1060,8 @@ class NavigationEnvV2(Env):
 
 
         if self.ready_obs:
-            return np.hstack((player_obs_shuffled, food_info_obs)), nreward[0], ndone, ninfo[0]
+
+            return np.hstack((player_obs_shuffled, food_info_obs))
 
 
 
