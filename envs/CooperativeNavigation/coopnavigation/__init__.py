@@ -87,7 +87,7 @@ for sight, s in product(sights, sizes):
             "with_shuffle": False,
             "gnn_input": True,
             "with_openness": True,
-            "with_gnn_shuffle": False,
+            "with_gnn_shuffle": True,
             "collapsed": False,
             "designated_device": "cpu",
             "disappearance_prob": 0.,

@@ -1060,8 +1060,9 @@ class NavigationEnvV2(Env):
 
 
         if self.ready_obs:
-            
-            return np.hstack((remaining_info, player_info, food_info_obs))
+            return np.hstack((player_obs_shuffled, food_info_obs)), nreward[0], ndone, ninfo[0]
+
+
 
         if not self.with_gnn_shuffle:
             return {
@@ -1408,8 +1409,7 @@ class NavigationEnvV2(Env):
 
         
         if self.ready_obs:
-            
-            return np.hstack((remaining_info, player_info, food_info_obs)), nreward[0], ndone, ninfo[0]
+            return np.hstack((player_obs_shuffled, complete_food_info_obs)), nreward[0], ndone, ninfo[0]
 
         if not self.with_gnn_shuffle:
             return {
