@@ -58,13 +58,13 @@ algorithm:
     observation_type : None
 
     # Set to 0 to switch off
-    action_encoding: 128
+    action_encoding: 16
 
     # Set automatically to false if encoding_loss_coef==0
     resample: True
 
     # RNN dimension
-    h_dim: 256 #  = z_dim
+    h_dim: 100 #  = z_dim
 
     init_function: orthogonal_
     encoder_batch_norm: False
@@ -76,7 +76,7 @@ algorithm:
   particle_filter:
     num_particles : 10
     particle_aggregation: fc # rnn
-    z_dim : 256
+    z_dim : 100
     average_particle : True # when using linear layer we average the particles
     prior_loss_coef: 1.0
     obs_loss_coef: 1.0
