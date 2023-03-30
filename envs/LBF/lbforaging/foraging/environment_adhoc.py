@@ -128,7 +128,7 @@ class ForagingEnv(Env):
         self.pre_agent_queue = []
         self.with_gnn_shuffle = with_gnn_shuffle
         self.collapsed = collapsed
-
+        self.max_num_player = players
         # np.random.seed(seed)
 
         self.agent_state_span = [0] * len(self.players)
@@ -151,7 +151,17 @@ class ForagingEnv(Env):
     @property
     def observation_space(self):
         if self.ready_obs:
-            return self._get_observation_space_real()["all_information"]
+            # return self._get_observation_space_real()["all_information"]
+            player_len = self.max_num_player*3
+            food_info_len = 3 * self.max_food
+            existence = self.max_num_player 
+
+            return gym.spaces.Box(
+                        low=-np.inf, high=+np.inf,
+                        shape=(player_len+food_info_len,)
+                    )
+
+        
         else:
 
             return self._get_observation_space_real()
@@ -944,6 +954,7 @@ class ForagingEnv(Env):
         nobs, nreward, ndone, ninfo, active_unobs = self._make_gym_obs(observations)
         n_obs_complete, _, _, _, complete_active_unobs = self._make_gym_obs(complete_learner_observation)
 
+       
         self.prev_active_unobs = self.active_unobs
         self.active_unobs = active_unobs[0]
 
@@ -1070,6 +1081,13 @@ class ForagingEnv(Env):
         complete_remaining_info = np.array(self.complete_remaining_idxs, np.int32)
         num_agents = np.array([sum(active_unobs[0])], np.int32)
         complete_num_agents = np.array([sum(complete_active_unobs[0])], np.int32)
+
+
+
+        if self.ready_obs:
+
+            return np.hstack((player_obs_shuffled, food_info_obs))
+
 
         if not self.with_gnn_shuffle:
             return {
@@ -1431,6 +1449,11 @@ class ForagingEnv(Env):
         self.complete_prev_active_unobs = self.complete_active_unobs
         self.active_unobs = active_unobs[0]
         self.complete_active_unobs = complete_active_unobs[0]
+
+
+
+        if self.ready_obs:
+            return np.hstack((player_obs_shuffled, food_info_obs)), nreward[0], ndone, ninfo[0]
         
         if not self.with_gnn_shuffle:
 
