@@ -35,7 +35,7 @@ register(
     entry_point='Wolfpack_gym.envs:WolfpackPenaltySingleAdhoc',
     kwargs={'grid_height': 10, 'grid_width' : 10, 'num_players':3, 'seed':100, 'with_oppo_mod':True,
             'close_penalty':0.5, 'implicit_max_player_num':3, 'max_player_num':5, 'with_shuffling':True,
-            'rgb_obs': False, 'tile_obs' : False, 'tile_size':5, 'rnn_with_gnn':False, 'collapsed':False,
+            'rgb_obs': False, 'tile_obs' : False, 'tile_size':5, 'rnn_with_gnn':True, 'collapsed':False,
             'main_sight_radius' : 3, "disappearance_prob": 0.15, "perturbation_probs":[1.0]}
 )
 
@@ -45,8 +45,8 @@ register(
     entry_point='Wolfpack_gym.envs:WolfpackPenaltySingleAdhoc',
     kwargs={'grid_height': 10, 'grid_width' : 10, 'num_players':3, 'seed':100, 'with_oppo_mod':True,
             'close_penalty':0.5, 'implicit_max_player_num':3, 'max_player_num':5, 'with_shuffling':True,
-            'rgb_obs': False, 'tile_obs' : False, 'tile_size':5, 'rnn_with_gnn':False, 'collapsed':False,
-            'main_sight_radius' : 3, "disappearance_prob": 0., "perturbation_probs":[1.0, 0., 0.], 'ready_obs': True}, 
+            'rgb_obs': False, 'tile_obs' : False, 'tile_size':5, 'rnn_with_gnn':True, 'collapsed':False,
+            'main_sight_radius' : 3, "disappearance_prob": 0., "perturbation_probs":[1.0, 0., 0.], 'prey_with_gpu':False, 'ready_obs': True}, 
 )
 
 

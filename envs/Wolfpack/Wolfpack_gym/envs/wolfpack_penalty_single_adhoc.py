@@ -140,7 +140,7 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
                  add_rate=0.05, del_rate=0.05, seed=None, max_player_num=5,
                  implicit_max_player_num=3, with_shuffling=True,
                  obs_type="main_player", with_random_grid=False, random_grid_dir=None,
-                 prey_with_gpu=True, with_oppo_mod=True, close_penalty=0.5, rgb_obs=False,
+                 prey_with_gpu=False, with_oppo_mod=True, close_penalty=0.5, rgb_obs=False,
                  tile_obs=False, tile_size=5, rnn_with_gnn=False, collapsed=False,
                  main_sight_radius=3, disappearance_prob=0.15, perturbation_probs=[0.6,0.3,0.1], ready_obs=False):
 
@@ -531,8 +531,7 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
             player_obses[0]["remaining_flags"] = remaining_flags
 
         if self.ready_obs:
-            # print(player_obses[0]["teammate_location"],player_obses[0]["opponent_info"])
-            return np.hstack((player_obses[0]["teammate_location"],player_obses[0]["opponent_info"]))
+            return np.hstack((player_obses[0]["teammate_location_shuffled"],player_obses[0]["opponent_info"]))
         else:
             return player_obses[0]
 
@@ -1268,8 +1267,7 @@ class WolfpackPenaltySingleAdhoc(gym.Env):
         self.food_obses = food_returns[0]
         self.other_player_obses = player_returns[0][1:]
         if self.ready_obs:
-            # print(player_obses[0]["teammate_location"],player_obses[0]["opponent_info"])
-            obs = np.hstack((player_returns[0][0]["teammate_location"],player_returns[0][0]["opponent_info"]))
+            obs = np.hstack((player_returns[0][0]["teammate_location_shuffled"],player_returns[0][0]["opponent_info"]))
             
             return obs, player_returns[1][0], player_returns[2][0], {}
         else:

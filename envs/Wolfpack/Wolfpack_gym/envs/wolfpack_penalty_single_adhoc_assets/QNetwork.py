@@ -232,7 +232,7 @@ class GraphLSTM(nn.Module):
 
 class GraphOppoModel(nn.Module):
     def __init__(self,dim_in_node, dim_in_edge, dim_in_u, hidden_dim, hidden_dim2, dim_mid, dim_out,
-                 added_mid_dims, act_dims, device):
+                 added_mid_dims, act_dims, device="cpu"):
         super(GraphOppoModel, self).__init__()
         self.device = device
         self.GNBlock = RFMBlock(dim_mid + dim_in_node + dim_in_u,
