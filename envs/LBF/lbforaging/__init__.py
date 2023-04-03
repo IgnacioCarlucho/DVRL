@@ -121,13 +121,13 @@ for sight, s, f, c in product(sights, sizes, foods, coop):
             "effective_max_num_players": 5,
             "init_num_players": 5,
             "with_shuffle": False,
-            "gnn_input": False,
+            "gnn_input": True,
             "with_openness": True,
-            "with_gnn_shuffle": False,
+            "with_gnn_shuffle": True,
             "collapsed": False,
             "ready_obs": True,
         },
-    )   
+    )
 
 for sight, s, f, c in product(sights, sizes, foods, coop):
     register(

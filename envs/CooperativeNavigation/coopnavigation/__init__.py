@@ -95,3 +95,28 @@ for sight, s in product(sights, sizes):
             'ready_obs': True
         },
     )
+
+for sight, s in product(sights, sizes):
+    register(
+        id="PO-Navigation-DVRL-t-{0}-{1}x{1}-v1".format(sight, s),
+        entry_point="coopnavigation.navigation:NavigationEnvV2",
+        kwargs={
+            "players": 5,
+            "field_size": (s, s),
+            "sight": sight,
+            "other_player_sight": s,
+            "max_episode_steps": 50,
+            "seed": 100,
+            "effective_max_num_players": 5,
+            "init_num_players": 5,
+            "with_shuffle": False,
+            "gnn_input": True,
+            "with_openness": True,
+            "with_gnn_shuffle": True,
+            "collapsed": False,
+            "designated_device": "cpu",
+            "disappearance_prob": 0.,
+            "perturbation_prob": [1.,0.,0.],
+            'ready_obs': True
+        },
+    )
